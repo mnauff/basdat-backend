@@ -26,6 +26,7 @@ export const createAccount = async (req, res) => {
     const { accountId, password, role } = req.body;
     const hashedPassword = await hashPw(password); // Assuming 'hashPw' is an asynchronous function
     const createId = uuidv4();
+    // tes doang
 
     const isStudent = await prisma.student.findFirst({
       where: {
