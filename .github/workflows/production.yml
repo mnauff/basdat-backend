@@ -23,9 +23,6 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Build and Test
-              run: npm run build
-
             - name: Deploy to Vercel
               run: |
                   # Log in to Vercel (replace with your Vercel token)
