@@ -1,28 +1,42 @@
 {
-  "name": "back",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "seed": "node ./src/utils/seed.js",
-    "start": "nodemon -r dotenv/config src/index.js dotenv_config_path=./.env",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@prisma/client": "^5.4.2",
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "nodemon": "^3.0.1",
-    "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "prisma": "^5.4.2"
-  }
+    "name": "back",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "seed": "node ./src/utils/seed.js",
+        "format": "prettier --write .",
+        "start": "nodemon -r dotenv/config src/index.js dotenv_config_path=./.env",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "prepare": "husky install"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@prisma/client": "^5.4.2",
+        "bcrypt": "^5.1.1",
+        "body-parser": "^1.20.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "nodemon": "^3.0.1",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^18.0.0",
+        "@commitlint/config-conventional": "^18.0.0",
+        "eslint": "^8.52.0",
+        "eslint-config-prettier": "^9.0.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^15.0.2",
+        "prettier": "^3.0.3",
+        "prisma": "^5.4.2"
+    },
+    "lint-staged": {
+        "**/*.{js,jsx,ts,tsx,html,css,json}": [
+            "npm run format"
+        ]
+    }
 }
