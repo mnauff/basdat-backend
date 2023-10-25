@@ -1,5 +1,5 @@
 import express from 'express'
-import { createAccount, getAllAccount } from '../controller/user.controller.js'
+import { createAccount, getAllAccount } from '../service/user.service.js'
 
 const router = express.Router()
 
