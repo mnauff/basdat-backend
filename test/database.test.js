@@ -13,10 +13,10 @@ test('Create Student and Delete', async () => {
     expect(student.studentId).toBe('5024211006')
 
     const deleteData = await prisma.student.delete({
-        where: { studentId: student.studentId }, // Use '==' to match the studentId
+        where: { studentId: student.studentId },
     })
 
-    expect(deleteData.studentId).toBe(student.studentId) // Optional: Verify the deleted studentId
+    expect(deleteData.studentId).toBe(student.studentId)
 }, 30000)
 
 afterAll(async () => {
