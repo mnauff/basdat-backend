@@ -1,16 +1,23 @@
-import { hashPw } from '../utils/hash.js'
-import prisma from '../utils/prisma.js'
+import { hashPw } from '../../utils/hash.js'
+import prisma from '../../utils/prisma.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const getAllAccount = async (req, res) => {
     try {
-        const users = await prisma.account.findMany()
+        const users = await prisma.account.findMany({
+            where: {
+                role: {
+                    not: 'ADMIN',
+                },
+            },
+        })
 
         if (users.length === 0) {
             return res.status(404).json({
                 message: 'No users found in the database.',
             })
         }
+
         res.json(users)
     } catch (error) {
         res.status(500).json({
@@ -24,7 +31,6 @@ export const createAccount = async (req, res) => {
         const { accountId, password, role } = req.body
         const hashedPassword = await hashPw(password) // Assuming 'hashPw' is an asynchronous function
         const createId = uuidv4()
-        // tes doang
 
         const isStudent = await prisma.student.findFirst({
             where: {

@@ -2,12 +2,11 @@ import prisma from './prisma.js'
 
 async function main() {
     try {
-        const studentData = await prisma.student.create({
+        const AdminData = await prisma.account.create({
             data: {
-                name: 'Muhammad Naufal Rafianto',
-                studentId: '5024211042',
-                email: 'mnaufalrafianto@gmail.com',
-                grade: 98.5,
+                accountId: '10101010',
+                password: '$2b$10$1jrXO7KiyyGDelgphjPYv.tU5z7n28IVm7CYprl1u60jDche6DuoC',
+                role: 'ADMIN',
             },
         })
         console.log({ studentData })

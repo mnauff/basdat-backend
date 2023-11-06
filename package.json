@@ -5,11 +5,12 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "seed": "node ./src/utils/seed.js",
+        "generate": "npx prisma generate",
+        "seed": "node ./utils/seed.js",
         "format": "prettier --write .",
-        "start": "nodemon -r dotenv/config src/index.js dotenv_config_path=./.env",
         "prepare": "husky install",
-        "migrate": "node ./src/utils/migrate.js",
+        "build": "npm run generate",
+        "start": "nodemon -r dotenv/config src/index.js dotenv_config_path=./.env && npm run build",
         "test": "jest"
     },
     "keywords": [],
@@ -22,6 +23,7 @@
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
         "nodemon": "^3.0.1",
         "pg": "^8.11.3",
         "sequelize": "^6.33.0",

@@ -1,4 +1,4 @@
-import prisma from '../src/utils/prisma.js'
+import prisma from '../utils/prisma.js'
 
 test('Create Student and Delete', async () => {
     const student = await prisma.student.create({
