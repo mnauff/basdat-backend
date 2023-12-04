@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export const getAllPracticum = async (req, res) => {
     try {
-        const practicums = await prisma.practicum.findMany
+        const practicums = await prisma.practicum.findMany()
         if (practicums.length === 0) {
             return res.status(404).json({
                 message: 'No practicums found in the database.',
