@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -20,12 +20,42 @@ model Account {
 }
 
 model Student {
-  studentId String   @id @unique
-  name      String
-  email     String
-  grade     Decimal?
-  accountId String?  @unique
-  account   Account? @relation(fields: [accountId], references: [accountId])
+  studentId  String   @id @unique
+  name       String
+  email      String
+  finalGrade Decimal?
+  accountId  String?  @unique
+  group      Group[]
+  groupId    String?
+  account    Account? @relation(fields: [accountId], references: [accountId])
+
+  @@index([groupId])
+}
+
+model Group {
+  groupId     String    @id @unique @default(uuid())
+  student     Student[]
+  grade       Decimal?
+  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
+  practicumId String    @unique
+}
+
+model Practicum {
+  practicumId String   @id @unique @default(uuid())
+  name        String
+  place       String
+  time        DateTime
+  group       Group[]
+  modules     Module[]
+}
+
+model Module {
+  moduleId    String    @id @unique @default(uuid())
+  name        String
+  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
+  practicumId String
+
+  @@index([practicumId])
 }
 
 enum Role {
