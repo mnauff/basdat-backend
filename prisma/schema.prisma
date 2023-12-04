@@ -9,24 +9,24 @@ datasource db {
 }
 
 model Account {
-  id           String   @id @unique @default(uuid())
   accountId    String   @unique
   password     String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   role         Role     @default(STUDENT)
   refreshToken String?
+  id           String   @id @unique @default(uuid())
   student      Student?
 }
 
 model Student {
-  studentId  String   @id @unique
   name       String
   email      String
-  finalGrade Decimal?
+  studentId  String   @id @unique
   accountId  String?  @unique
-  group      Group[]
+  finalGrade Decimal?
   groupId    String?
+  group      Group[]
   account    Account? @relation(fields: [accountId], references: [accountId])
 
   @@index([groupId])
@@ -34,10 +34,10 @@ model Student {
 
 model Group {
   groupId     String    @id @unique @default(uuid())
-  student     Student[]
   grade       Decimal?
-  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
   practicumId String    @unique
+  student     Student[]
+  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
 }
 
 model Practicum {
@@ -52,10 +52,19 @@ model Practicum {
 model Module {
   moduleId    String    @id @unique @default(uuid())
   name        String
-  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
   practicumId String
+  practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
 
   @@index([practicumId])
+}
+
+model GroupToStudent {
+  A String
+  B String
+
+  @@unique([A, B], map: "_GroupToStudent_AB_unique")
+  @@index([B], map: "_GroupToStudent_B_index")
+  @@map("_GroupToStudent")
 }
 
 enum Role {

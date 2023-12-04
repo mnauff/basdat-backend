@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-
+/** */
 export const verifyJwt = (req, res, next) => {
     const authHeader = req.headers['authorization'] // The header should be 'Authorization' with a capital 'A'
 
