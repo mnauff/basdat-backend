@@ -2,16 +2,16 @@ import { hashPw } from '../../utils/hash.js'
 import prisma from '../../utils/prisma.js'
 import { v4 as uuidv4 } from 'uuid'
 
-/** Melihat berdasarkan jenis praktikum  */
-export const getAllPracticum = async (req, res) => {
+/** Menampilkan semua students */
+export const getAllStudents = async (req, res) => {
     try {
-        const practicums = await prisma.practicum.findMany()
-        if (practicums.length === 0) {
+        const students = await prisma.student.findMany()
+        if (students.length === 0) {
             return res.status(404).json({
-                message: 'No practicums found in the database.',
+                message: 'No student found in the database.',
             })
         }
-        res.json(practicums)
+        res.json(students)
     } catch (error) {
         res.status(500).json({
             message: 'Something went wrong',
@@ -19,7 +19,6 @@ export const getAllPracticum = async (req, res) => {
     }
 }
 
-/** Melihat berdasarkan Id  */
 export const getById = async (req, res) => {
     try {
         const { id } = req.params
@@ -99,7 +98,6 @@ export const delById = async (req, res) => {
     }
 }
 
-/** Membuat data praktikum  */
 export const createPracticum = async (req, res) => {
     try {
         const { name, place, time } = req.body
