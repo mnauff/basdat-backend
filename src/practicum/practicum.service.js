@@ -49,8 +49,7 @@ export const patchById = async (req, res) => {
         /**Req dari parameter id jadi parameter (12c8124e-cf30-45a4-9e24-18ff437e56d1) */
         const { id } = req.params
         /**Req dari Body */
-        const { name, place, time } = req.body
-        const createId = uuidv4()
+        const { name, place, date } = req.body
 
         const existingPracticum = await prisma.practicum.update({
             where: {
@@ -60,7 +59,7 @@ export const patchById = async (req, res) => {
             data: {
                 name: name,
                 place: place,
-                time: time,
+                date: date,
             },
         })
 
@@ -102,7 +101,7 @@ export const delById = async (req, res) => {
 /** Membuat data praktikum  */
 export const createPracticum = async (req, res) => {
     try {
-        const { name, place, time } = req.body
+        const { name, place, date } = req.body
         const createId = uuidv4()
 
         const existingPracticum = await prisma.practicum.findFirst({
@@ -122,7 +121,7 @@ export const createPracticum = async (req, res) => {
                 practicumId: createId,
                 name: name,
                 place: place,
-                time: time,
+                date: date,
             },
         })
 

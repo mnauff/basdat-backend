@@ -9,19 +9,20 @@ datasource db {
 }
 
 model Account {
+  id           String   @id @unique @default(uuid())
   accountId    String   @unique
-  password     String
+  email        String?  @unique
+  password     String?
+  isVerified   Boolean?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   role         Role     @default(STUDENT)
   refreshToken String?
-  id           String   @id @unique @default(uuid())
   student      Student?
 }
 
 model Student {
   name       String
-  email      String
   studentId  String   @id @unique
   accountId  String?  @unique
   finalGrade Decimal?
@@ -34,19 +35,18 @@ model Student {
 
 model Group {
   groupId     String    @id @unique @default(uuid())
-  grade       Decimal?
   practicumId String    @unique
   student     Student[]
   practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
 }
 
 model Practicum {
-  practicumId String   @id @unique @default(uuid())
-  name        String
-  place       String
-  time        DateTime
-  group       Group[]
-  modules     Module[]
+  practicumId   String   @id @unique @default(uuid())
+  practicumname String
+  place         String
+  date          DateTime
+  group         Group[]
+  modules       Module[]
 }
 
 model Module {

@@ -28,7 +28,7 @@ export const getAllAccount = async (req, res) => {
 
 export const createAccount = async (req, res) => {
     try {
-        const { accountId, password, role } = req.body
+        const { accountId, password, role, email, refreshToken } = req.body
         const hashedPassword = await hashPw(password) // Assuming 'hashPw' is an asynchronous function
         const createId = uuidv4()
 
@@ -58,9 +58,11 @@ export const createAccount = async (req, res) => {
         await prisma.account.create({
             data: {
                 id: createId,
+                email: email,
                 accountId,
                 password: hashedPassword,
                 role: role,
+                refreshToken: refreshToken,
             },
         })
 
