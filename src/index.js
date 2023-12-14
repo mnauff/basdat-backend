@@ -18,6 +18,4 @@ app.use('/api/v1/account', verifyJwt, account)
 app.use('/api/v1/auth', auth)
 app.use('/api/v1/practicum', practicum)
 
-app.listen(8888, () => {
-    console.log(`Server is running on port ${8888}`)
-})
+app.listen(8888)

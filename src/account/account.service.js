@@ -1,35 +1,55 @@
 import { hashPw } from '../../utils/hash.js'
 import prisma from '../../utils/prisma.js'
 import { v4 as uuidv4 } from 'uuid'
+import { generateResponse } from '../../utils/response.js'
 
 export const getAllAccount = async (req, res) => {
     try {
-        const users = await prisma.account.findMany({
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 3
+        const offset = (page - 1) * limit
+        const student_id = req.query.student_id || ''
+        const sort = req.query.sort || 'accountId'
+        const sortBy = req.query.sort_by || 'asc'
+
+        const accounts = await prisma.account.findMany({
+            take: limit,
+            skip: offset,
+            orderBy: {
+                [sort]: sortBy,
+            },
             where: {
-                role: {
-                    not: 'ADMIN',
+                accountId: {
+                    contains: student_id,
                 },
+            },
+            select: {
+                accountId: true,
+                email: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
             },
         })
 
-        if (users.length === 0) {
-            return res.status(404).json({
-                message: 'No users found in the database.',
-            })
+        if (accounts.length === 0) {
+            const response = generateResponse(404, 'BAD_REQUEST', { errors: { user: ['User not found'] } })
+            return res.status(404).json(response)
         }
 
-        res.json(users)
+        const response = generateResponse(200, 'OK', accounts)
+        return res.json(response)
     } catch (error) {
-        res.status(500).json({
-            message: 'Something went wrong',
-        })
+        console.log(error)
+        const response = generateResponse(500, 'Internal Server Error')
+        return res.status(500).json(response)
     }
 }
 
 export const createAccount = async (req, res) => {
     try {
-        const { accountId, password, role } = req.body
-        const hashedPassword = await hashPw(password) // Assuming 'hashPw' is an asynchronous function
+        const { accountId, role } = req.body
+        const hashedPassword = await hashPw(password)
         const createId = uuidv4()
 
         const isStudent = await prisma.student.findFirst({
@@ -46,7 +66,8 @@ export const createAccount = async (req, res) => {
 
         if (role === 'STUDENT') {
             if (!isStudent) {
-                return res.status(400).json({ message: 'Student ID is not found!' })
+                const response = generateResponse(404, 'BAD_REQUEST', { errors: { user: ['User not found'] } })
+                return res.status(404).json(response)
             }
         }
 
@@ -54,7 +75,6 @@ export const createAccount = async (req, res) => {
             return res.status(400).json({ message: 'Account already exists!' })
         }
 
-        // Create the account
         await prisma.account.create({
             data: {
                 id: createId,
@@ -64,17 +84,18 @@ export const createAccount = async (req, res) => {
             },
         })
 
-        // Update the student to link it to the created account
-        await prisma.student.update({
+        const newUser = await prisma.student.update({
             where: { studentId: accountId },
             data: {
-                accountId: createId, // Assuming you want to link the student to the account using 'accountId'
+                accountId: createId,
             },
         })
 
-        return res.status(200).json({ message: 'Account created successfully' })
+        const response = generateResponse(201, 'OK', { student_id: newUser.studentId })
+        return res.status(201).json(response)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: 'Internal server error' })
+        const response = generateResponse(500, 'BAD_REQUEST', { error: { server: ['Internal server error', error] } })
+        return res.status(500).json(response)
     }
 }

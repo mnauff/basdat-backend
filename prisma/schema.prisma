@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -9,19 +10,20 @@ datasource db {
 }
 
 model Account {
+  id           String   @id @unique @default(uuid())
   accountId    String   @unique
-  password     String
+  email        String?  @unique
+  password     String?
+  isVerified   Boolean?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   role         Role     @default(STUDENT)
-  refreshToken String?
-  id           String   @id @unique @default(uuid())
   student      Student?
+  refreshToken String?
 }
 
 model Student {
   name       String
-  email      String
   studentId  String   @id @unique
   accountId  String?  @unique
   finalGrade Decimal?
@@ -34,38 +36,39 @@ model Student {
 
 model Group {
   groupId     String    @id @unique @default(uuid())
-  grade       Decimal?
   practicumId String    @unique
   student     Student[]
   practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
 }
 
 model Practicum {
-  practicumId String   @id @unique @default(uuid())
-  name        String
-  place       String
-  time        DateTime
-  group       Group[]
-  modules     Module[]
+  practicumId   String   @id @unique @default(uuid())
+  practicumName String
+  place         String
+  startDate     DateTime
+  endDate       DateTime
+  group         Group[]
+  modules       Module[]
 }
 
 model Module {
   moduleId    String    @id @unique @default(uuid())
   name        String
   practicumId String
+  date        DateTime
   practicum   Practicum @relation(fields: [practicumId], references: [practicumId])
 
   @@index([practicumId])
 }
 
-model GroupToStudent {
-  A String
-  B String
+// model GroupToStudent {
+//   A String
+//   B String
 
-  @@unique([A, B], map: "_GroupToStudent_AB_unique")
-  @@index([B], map: "_GroupToStudent_B_index")
-  @@map("_GroupToStudent")
-}
+//   @@unique([A, B], map: "_GroupToStudent_AB_unique")
+//   @@index([B], map: "_GroupToStudent_B_index")
+//   @@map("_GroupToStudent")
+// }
 
 enum Role {
   ADMIN

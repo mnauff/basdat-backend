@@ -1,61 +1,85 @@
-import { hashPw } from '../../utils/hash.js'
 import prisma from '../../utils/prisma.js'
 import { v4 as uuidv4 } from 'uuid'
+import { generateResponse } from '../../utils/response.js'
+import { HttpStatus } from '../../constant/index.js'
 
 /** Melihat berdasarkan jenis praktikum  */
 export const getAllPracticum = async (req, res) => {
     try {
-        const practicums = await prisma.practicum.findMany()
-        if (practicums.length === 0) {
-            return res.status(404).json({
-                message: 'No practicums found in the database.',
-            })
-        }
-        res.json(practicums)
-    } catch (error) {
-        res.status(500).json({
-            message: 'Something went wrong',
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 3
+        const offset = (page - 1) * limit
+        const search = req.query.search || ''
+        const sort = req.query.sort || 'practicumName'
+        const sortBy = req.query.sort_by || 'asc'
+
+        const practicums = await prisma.practicum.findMany({
+            take: limit,
+            skip: offset,
+            orderBy: {
+                [sort]: sortBy,
+            },
+            where: {
+                practicumName: {
+                    contains: search,
+                },
+            },
+            select: {
+                practicumName: true,
+                place: true,
+                date: true,
+                modules: true,
+            },
         })
+
+        if (practicums.length === 0) {
+            const response = generateResponse(404, 'No practicums found in the database.')
+            return res.status(404).json(response)
+        }
+
+        const response = generateResponse(200, 'OK', { practicums })
+        return res.status(200).json(response)
+    } catch (error) {
+        console.log(error)
+        const response = generateResponse(500, 'INTERNAL_SERVER_ERROR', {
+            server: ['Internal server error', error],
+        })
+        return res.status(500).json(response)
     }
 }
 
-/** Melihat berdasarkan Id  */
 export const getById = async (req, res) => {
     try {
         const { id } = req.params
-        const createId = uuidv4()
 
         const existingPracticum = await prisma.practicum.findUnique({
             where: {
                 practicumId: id,
-                /** sama name: name, dengan name, */
             },
         })
 
         if (!existingPracticum) {
-            return res.status(404).json({ message: 'Not Found!' })
+            const response = generateResponse(404, 'Not Found!')
+            return res.status(404).json(response)
         }
-        /**kalo berhasil menampilkan */
-        return res.status(200).json(existingPracticum)
+
+        const response = generateResponse(200, 'OK', { existingPracticum })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: 'Internal server error' })
+        const response = generateResponse(500, 'INTERNAL_SERVER_ERROR', { server: ['Internal server error', error] })
+        return res.status(500).json(response)
     }
 }
 
-/** Mengganti nilai item praktikum */
 export const patchById = async (req, res) => {
     try {
-        /**Req dari parameter id jadi parameter (12c8124e-cf30-45a4-9e24-18ff437e56d1) */
         const { id } = req.params
-        /**Req dari Body */
         const { name, place, time } = req.body
-        const createId = uuidv4()
 
         const existingPracticum = await prisma.practicum.update({
             where: {
                 practicumId: id,
-                /** sama name: name, dengan name, */
             },
             data: {
                 name: name,
@@ -65,70 +89,81 @@ export const patchById = async (req, res) => {
         })
 
         if (!existingPracticum) {
-            return res.status(404).json({ message: 'Not Found!' })
+            const response = generateResponse(404, 'Not Found!')
+            return res.status(404).json(response)
         }
-        /**kalo berhasil menampilkan */
-        return res.status(200).json(existingPracticum)
+
+        const response = generateResponse(200, 'OK', { existingPracticum })
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: 'Internal server error' })
+        const response = generateResponse(500, 'INTERNAL_SERVER_ERROR', { server: ['Internal server error', error] })
+        return res.status(500).json(response)
     }
 }
 
-/** Menghapus Id Praktikum (Jenis Praktikum) */
 export const delById = async (req, res) => {
     try {
-        /**Req dari parameter id jadi parameter (12c8124e-cf30-45a4-9e24-18ff437e56d1) */
         const { id } = req.params
 
         const existingPracticum = await prisma.practicum.delete({
             where: {
                 practicumId: id,
-                /** sama name: name, dengan name, */
             },
         })
 
         if (!existingPracticum) {
-            return res.status(404).json({ message: 'Not Found!' })
+            const response = generateResponse(404, 'Not Found!')
+            return res.status(404).json(response)
         }
-        /**kalo berhasil menampilkan */
-        return res.status(200).json({ message: `praktikum with ${id} has been deleted` })
+
+        const response = generateResponse(200, 'OK', `Practicum with ${id} has been deleted`)
+        return res.status(200).json(response)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: 'Internal server error' })
+        const response = generateResponse(500, 'INTERNAL_SERVER_ERROR', { server: ['Internal server error', error] })
+        return res.status(500).json(response)
     }
 }
 
-/** Membuat data praktikum  */
 export const createPracticum = async (req, res) => {
     try {
-        const { name, place, time } = req.body
+        const { practicumName, place, startDate, endDate } = req.body
         const createId = uuidv4()
 
         const existingPracticum = await prisma.practicum.findFirst({
             where: {
-                name: name,
-                /** sama name: name, dengan name, */
+                practicumName: practicumName,
             },
         })
 
         if (existingPracticum) {
-            return res.status(400).json({ message: 'Practicum already exists!' })
+            const response = generateResponse(HttpStatus.CONFLICT.code, HttpStatus.CONFLICT.status, {
+                server: ['Practicum is already added!'],
+            })
+            return res.status(409).json(response)
         }
 
-        // Create the account
-        await prisma.practicum.create({
+        const practicum = await prisma.practicum.create({
             data: {
                 practicumId: createId,
-                name: name,
-                place: place,
-                time: time,
+                practicumName,
+                place,
+                startDate,
+                endDate,
+            },
+
+            select: {
+                practicumId: true,
+                practicumName: true,
             },
         })
 
-        return res.status(200).json({ message: 'Account created successfully' })
+        const response = generateResponse(201, 'OK', practicum)
+        return res.status(201).json(response)
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: 'Internal server error' })
+        const response = generateResponse(500, 'INTERNAL_SERVER_ERROR', { server: ['Internal server error', error] })
+        return res.status(500).json(response)
     }
 }

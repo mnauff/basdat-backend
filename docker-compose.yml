@@ -1,25 +1,46 @@
 version: '3.8'
 
 services:
+    mysqldb:
+        image: mysql:8.2
+        restart: unless-stopped
+        env_file: .env
+        environment:
+            - MYSQLDB_ROOT_PASSWORD=${MYSQLDB_ROOT_PASSWORD}
+            - MYSQLDB_DATABASE=${MYSQLDB_DATABASE}
+        volumes:
+            - db:/var/lib/mysql
+        ports:
+            - '3310:3306'
     nodejs:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile # Ensure the correct Dockerfile name
+        image: nodejs
+        container_name: nodejs
+        restart: unless-stopped
         env_file:
             - .env
+        environment:
+            - DATABASE_URL=$DATABASE_URL
+            - GMAIL_EMAIL_ADDRESS=$GMAIL_EMAIL_ADDRESS
+            - GMAIL_PASSWORD=$GMAIL_PASSWORD
+            - ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET
+            - REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET
+            - MYSQL_ROOT_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+            - MYSQL_DATABASE=$MYSQLDB_DATABASE
         ports:
             - 8888:8888
         volumes:
-            - .:/usr/src/app
-        command: npm start
-#     postgres:
-#         image: postgres:alpine
-#         environment:
-#             - POSTGRES_USER=${DB_USER}
-#             - POSTGRES_PASSWORD=${DB_PASSWORD}
-#             - POSTGRES_DB=${DB_NAME}
-#         ports:
-#             - 5432:5432
-#         volumes:
-#             - postgres-db:/var/lib/postgresql/data
+            - .:/home/node/app
+            - node_modules:/home/node/app/node_modules
+        networks:
+            - app-network
 
-# volumes:
-#     postgres-db:
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    node_modules:
+    db:
