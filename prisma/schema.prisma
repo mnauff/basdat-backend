@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  account_id    String     @id @default(uuid())
+  user_id       String     @unique
+  email         String?    @unique
+  password      String?
+  is_verified   Boolean
+  role          ROLES
+  refresh_token String?
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  otp_token     OTP?
+  student       Student?
+  assistant     Assistant?
+}
+
+model OTP {
+  id            Int       @id @default(autoincrement())
+  user          Account   @relation(fields: [email], references: [email])
+  email        String @unique
+  otpSecret     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+}
+
+model Student {
+  student_id String   @id @unique
+  name       String
+  group      Group[]
+  grade      Grade[]
+  account_id String   @unique
+  account    Account? @relation(fields: [account_id], references: [account_id])
+}
+
+model Group {
+  group_id     String          @id @unique
+  practicum_id String
+  student      Student[]
+  practicum    Practicum       @relation(fields: [practicum_id], references: [practicum_id])
+  module       GroupToModule[]
+}
+
+model GroupToModule {
+  group        Group              @relation(fields: [group_id], references: [group_id])
+  assistant    AssistantPracticum @relation(fields: [assistant_id], references: [asistant_practicum_id])
+  modules      Module             @relation(fields: [module_id], references: [module_id])
+  group_id     String             @unique
+  assistant_id String             @unique
+  module_id    String             @unique
+  date         DateTime?
+}
+
+model Practicum {
+  practicum_id         String               @id @unique
+  practicum_name       String
+  place                String
+  start_date           DateTime
+  end_date             DateTime
+  group                Group[]
+  module               Module[]
+  assistantsPracticums AssistantPracticum[]
+}
+
+model Module {
+  module_id    String          @id @unique
+  module_name  String
+  grade        Grade[]
+  practicum_id String
+  practicum    Practicum       @relation(fields: [practicum_id], references: [practicum_id])
+  group        GroupToModule[]
+}
+
+model Grade {
+  student_id String  @unique
+  student    Student @relation(fields: [student_id], references: [student_id])
+  module     Module  @relation(fields: [module_id], references: [module_id])
+  module_id  String  @unique
+  grade      Float
+}
+
+model Assistant {
+  assistant_id         String               @id @unique
+  assistant_name       String
+  account_id           String               @unique
+  account              Account?             @relation(fields: [account_id], references: [account_id])
+  assistantsPracticums AssistantPracticum[]
+}
+
+model AssistantPracticum {
+  asistant_practicum_id String          @id @unique
+  asistant_id           String
+  assistant             Assistant       @relation(fields: [asistant_id], references: [assistant_id])
+  practicum             Practicum       @relation(fields: [practicum_id], references: [practicum_id])
+  practicum_id          String
+  group                 GroupToModule[]
+}
+
+enum ROLES {
+  ADMIN
+  STUDENT
+  ASSISTANT
+}
